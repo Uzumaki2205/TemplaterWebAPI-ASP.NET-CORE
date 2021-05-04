@@ -5,7 +5,7 @@ using System;
 
 namespace Jwt_Core1.Controllers.API
 {
-    [Route("api/Token/{action}")]
+    [Route("api/[controller]")]
     [ApiController]
     public class TokenController : ControllerBase
     {
@@ -16,24 +16,13 @@ namespace Jwt_Core1.Controllers.API
             _tokenService = tokenService;
         }
 
-        /// <summary>
-        /// Generate Token From Username
-        /// </summary>
-        /// <param name="username"></param>
-        /// <returns></returns>
-        [HttpPost]
+        [HttpPost("GenerateToken")]
         public Object GenerateToken([FromForm]string username)
         {
             return new Response { StatusCode = 200, Content = _tokenService.GenerateToken(username), Message = "Token Generated" };
         }
 
-        /// <summary>
-        /// Validate Token | Convert Token to username
-        /// </summary>
-        /// <param name="token"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        [HttpPost]
+        [HttpPost("ValidateToken")]
         public Response ValidateToken([FromForm] string token, string password)
         {
             string username = _tokenService.ValidateToken(token);

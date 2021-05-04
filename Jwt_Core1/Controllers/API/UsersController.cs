@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Http;
 namespace Jwt_Core.Controllers.API
 {
     [ApiController]
-    [Route("api/Users/{action}")]
+    [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
         private IHttpClientFactory factory;
@@ -27,7 +27,7 @@ namespace Jwt_Core.Controllers.API
         /// <param name="userParams"></param>
         /// <returns></returns>
         [AllowAnonymous]
-        [HttpPost]
+        [HttpPost("Login")]
         public Response Login([FromForm] TblUser userParams)
         {
             TblUser u = new UserService().Authenticate(userParams.Username, userParams.Password);

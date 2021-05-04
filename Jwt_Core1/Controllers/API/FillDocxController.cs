@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Jwt_Core1.Controllers.API
 {
-    [Route("api/filldocx/{action}")]
+    [Route("api/[controller]")]
     [ApiController]
     public class FillDocxController : ControllerBase
     {
@@ -26,12 +26,8 @@ namespace Jwt_Core1.Controllers.API
 
         public InfoVuln info { get; set; }
 
-        /// <summary>
-        /// Generate Template
-        /// </summary>
-        /// <param name="files"></param>
-        /// <param name="templatename"></param>
-        /// <returns></returns>
+
+        [HttpGet("Generate")]
         public Response Generate([FromForm] IFormFile files, [FromForm] string templatename)
         {
             var fileExt = Path.GetExtension(files.FileName).Substring(1);

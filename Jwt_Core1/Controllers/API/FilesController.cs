@@ -11,7 +11,7 @@ using System.Linq;
 namespace Jwt_Core1.Controllers.API
 {
     [Authorize]
-    [Route("api/Files/{action}")]
+    [Route("api/[controller]")]
     [ApiController]
     public class FilesController : ControllerBase
     {
@@ -26,7 +26,7 @@ namespace Jwt_Core1.Controllers.API
         /// Get All File
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
+        [HttpGet("GetAllFile")]
         public Response GetAllFile()
         {
             using (ApitemplatereportContext context = new ApitemplatereportContext())
@@ -42,11 +42,7 @@ namespace Jwt_Core1.Controllers.API
             return new Response();
         }
         
-        /// <summary>
-        /// Upload Template File
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost]
+        [HttpPost("Upload")]
         public Response Upload()
         {
             if (Request.HasFormContentType)
@@ -81,12 +77,7 @@ namespace Jwt_Core1.Controllers.API
             return new Response();
         }
 
-        /// <summary>
-        /// Download File
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
-        [HttpPost]
+        [HttpPost("Download")]
         public IActionResult Download([FromForm] string filename)
         {
             using (ApitemplatereportContext context = new ApitemplatereportContext())
@@ -103,12 +94,7 @@ namespace Jwt_Core1.Controllers.API
             return NotFound();
         }
 
-        /// <summary>
-        /// Delete File
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
-        [HttpPost]
+        [HttpPost("Delete")]
         public Response Delete([FromForm] string filename)
         {
             using (ApitemplatereportContext context = new ApitemplatereportContext())
