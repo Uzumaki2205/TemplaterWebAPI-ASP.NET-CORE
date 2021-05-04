@@ -1,0 +1,54 @@
+﻿@model Jwt_Core1.Models.Entities.ListFile
+@{ ViewBag.Title = "Generate Template"; }
+<div class="row">
+    <div class="col-md-10">
+        <h2>Generate Template</h2>
+        <hr />
+        @using (Html.BeginForm("Generate", "GenerateDocx", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="row">
+                <label class="col-md-2 control-label">Choose Template</label>
+                <div class="form-inline">
+                    <div class="form-group">
+                        <div class="col-md-10">
+                            @Html.DropDownList("templatename", 
+                           new SelectList(Model.FileList.Select(p => p.Filename)), 
+                           "-- Select Template --")
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <label class="col-md-2 control-label">Upload Json</label>
+                <div class="form-inline">
+                    <div class="form-group">
+                        <div class="col-md-10">
+                            <input type="file" id="file" name="file" class="form-control" required="required">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Generate" class="btn btn-success" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+         }
+    </div>
+</div>
+
+
+<script type="text/javascript">
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState["Error"].Errors.Count > 0)
+        {
+            <text>
+            $(document).ready(function() {
+                alert('@ViewData.ModelState["Error"].Errors.First().ErrorMessage');
+            });
+            </text>
+        }
+</script>

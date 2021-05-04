@@ -1,0 +1,77 @@
+﻿@model Jwt_Core1.Models.Entities.ListFile
+@{ ViewBag.Title = "File Upload & File Download"; }
+
+<div class="row">
+    <div class="col-md-10">
+        <h2>File Upload</h2>
+        <hr />
+        @using (Html.BeginForm("Upload", "FileUpload", FormMethod.Post,
+           new { enctype = "multipart/form-data", style = "margin:20px" }))
+         {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="row">
+                <label class="col-md-2 control-label">Upload Docx</label>
+                <div class="form-inline">
+                    <div class="form-group">
+                        <div class="col-md-10">
+                            <input type="file" id="file" name="file" class="form-control" required="required">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Upload" class="btn btn-success" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+         }
+    </div>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>FileName</th>
+            <th>Path</th>
+            <th>Download</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.FileList)
+        {
+            <tr>
+                <td>@item.Filename</td>
+                <td>@item.Fileurl</td>
+                <td>
+                    @using (Html.BeginForm("Download", "FileUpload", FormMethod.Post))
+                    {
+                        <input type="hidden" name="Filename" value="@item.Filename" />
+                        <button type="submit" style="width:100px" class="btn btn-info">Download</button>
+                    }          
+                </td>
+                <td>
+                    @using (Html.BeginForm("Delete", "FileUpload", FormMethod.Post))
+                    {
+                        <input type="hidden" name="Filename" value="@item.Filename" />
+                        <button type="submit" style="width: 100px" class="btn btn-danger">Delete</button>
+                    }                    
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    @if (!ViewData.ModelState.IsValid && ViewData.ModelState["Error"].Errors.Count > 0)
+    {
+        <text>
+        $(document).ready(function() {
+            alert('@ViewData.ModelState["Error"].Errors.First().ErrorMessage');
+        });
+        </text>
+    }
+</script>
+
