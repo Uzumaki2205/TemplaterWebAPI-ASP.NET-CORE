@@ -32,7 +32,7 @@ namespace Jwt_Core1.Models
                 {
                     new Claim(ClaimTypes.Name, username),
                 }),
-                Expires = DateTime.UtcNow.AddMinutes(30),
+                Expires = DateTime.UtcNow.AddMinutes(15),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var tokenDes = tokenHandler.CreateToken(tokenDescriptor);

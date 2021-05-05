@@ -1,14 +1,9 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using NGS.Templater;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Dynamic;
 using System.IO;
-using System.Web;
 
 namespace Jwt_Core1.Models
 {
@@ -20,22 +15,11 @@ namespace Jwt_Core1.Models
         private dynamic infoObject { get; set; }
         private dynamic tableObject { get; set; }
 
-        //private static InfoVuln _instance;
-        //public static InfoVuln GetInstance()
-        //{
-        //    if (_instance == null)
-        //    {
-        //        _instance = new InfoVuln();
-        //    }
-        //    return _instance;
-        //}
-
         public InfoVuln()
         { 
             TimeStamp = GetTimestamp(DateTime.Now); 
             CreateFolder(); 
         }
-
 
         private String GetTimestamp(DateTime value)
         {

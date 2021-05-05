@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Jwt_Core1.Models
 {
@@ -15,7 +12,7 @@ namespace Jwt_Core1.Models
         {
             StatusCode = 404;
             Message = "Fail";
-            Content = null;
+            Content = "Error when try bad request!!";
         }
     }
 }

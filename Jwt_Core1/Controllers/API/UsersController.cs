@@ -28,19 +28,19 @@ namespace Jwt_Core.Controllers.API
         /// <returns></returns>
         [AllowAnonymous]
         [HttpPost("Login")]
-        public Response Login([FromForm] TblUser userParams)
+        public Response Login([FromBody] UserLogin userParams)
         {
-            TblUser u = new UserService().Authenticate(userParams.Username, userParams.Password);
+            //TblUser u = new UserService().Authenticate(userParams.Username, userParams.Password);
 
-            if(u != null)
-            {
-                var parameters = new Dictionary<string, string> { { "username", u.Username } };
-                var encodedContent = new FormUrlEncodedContent(parameters);
+            //if(u != null)
+            //{
+                //var parameters = new Dictionary<string, string> { { "username", u.Username }, { "password", u.Password } };
+                //var encodedContent = new FormUrlEncodedContent(parameters);
 
-                var response = new RequestHelper(factory).PostRequest("api/Token/GenerateToken", encodedContent);
+                var response = new RequestHelper(factory).PostRequest("api/Token/GenerateToken", userParams);
                 if(response.StatusCode == 200)
                     return new Response() { StatusCode = 200, Message = "Login Success", Content = response.Content };  
-            }
+            //}
 
             return new Response { StatusCode = 400, Message = "Fail To Login", Content = null };
         }

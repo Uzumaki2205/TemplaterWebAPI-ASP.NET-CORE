@@ -36,12 +36,16 @@ namespace Jwt_Core1.Controllers.API
                 if (allFiles != null)
                 {
                     List<TblFileDetail> list = new List<TblFileDetail>(allFiles);
-                    return new Response { StatusCode = 200, Message = "All Files Uploaded", Content = list };
+                    return new Response { StatusCode = 200, Message = "All File", Content = list };
                 }
             }
             return new Response();
         }
         
+        /// <summary>
+        /// Upload File
+        /// </summary>
+        /// <returns></returns>
         [HttpPost("Upload")]
         public Response Upload()
         {
@@ -52,33 +56,41 @@ namespace Jwt_Core1.Controllers.API
                 {
                     var targetDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "Template");
                     var fileName = formFile.FileName;
-
-                    using (ApitemplatereportContext context = new ApitemplatereportContext())
+                    if(Path.GetExtension(fileName) == ".docx" || Path.GetExtension(fileName) == ".doc")
                     {
-                        TblFileDetail file = context.TblFileDetails.Where(file => file.Filename == fileName).FirstOrDefault();
-                        if (file != null)   
-                            fileName = formFile.FileName + "_" + GetTimestamp(DateTime.Now) 
-                                + Path.GetExtension(formFile.FileName);
+                        using (ApitemplatereportContext context = new ApitemplatereportContext())
+                        {
+                            TblFileDetail file = context.TblFileDetails.Where(file => file.Filename == fileName).FirstOrDefault();
+                            if (file != null)
+                                fileName = formFile.FileName + "_" + GetTimestamp(DateTime.Now)
+                                    + Path.GetExtension(formFile.FileName);
 
-                        var savePath = Path.Combine(targetDirectory, fileName);
+                            var savePath = Path.Combine(targetDirectory, fileName);
 
-                        using (var fileStream = new FileStream(savePath, FileMode.Create))
-                            formFile.CopyTo(fileStream);
+                            using (var fileStream = new FileStream(savePath, FileMode.Create))
+                                formFile.CopyTo(fileStream);
 
-                        var fileUrl = Url.Content(Path.Combine("~/Template/", fileName));
-                        context.TblFileDetails.Add(new TblFileDetail { Filename = fileName, Fileurl = fileUrl });
-                        context.SaveChanges();
+                            var fileUrl = Url.Content(Path.Combine("~/Template/", fileName));
+                            context.TblFileDetails.Add(new TblFileDetail { Filename = fileName, Fileurl = fileUrl });
+                            context.SaveChanges();
+                        }
+
+                        return new Response { StatusCode = 200, Content = fileName + "is Uploaded", Message = "File Uploaded" };
                     }
                 }
-
-                return new Response { StatusCode = 200, Content = null, Message = "File Uploaded" };
             }
 
-            return new Response();
+            return new Response { StatusCode = 404, Content = "File type is not support!!", Message = "Upload Error" };
         }
 
+
+        /// <summary>
+        /// Download File
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
         [HttpPost("Download")]
-        public IActionResult Download([FromForm] string filename)
+        public IActionResult Download([FromBody] string filename)
         {
             using (ApitemplatereportContext context = new ApitemplatereportContext())
             {
@@ -94,8 +106,13 @@ namespace Jwt_Core1.Controllers.API
             return NotFound();
         }
 
+        /// <summary>
+        /// Delete File
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
         [HttpPost("Delete")]
-        public Response Delete([FromForm] string filename)
+        public Response Delete([FromBody] string filename)
         {
             using (ApitemplatereportContext context = new ApitemplatereportContext())
             {

@@ -1,4 +1,5 @@
 ﻿using Jwt_Core1.Helpers;
+using Jwt_Core1.Models;
 using Jwt_Core1.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -26,19 +27,38 @@ namespace Jwt_Core1.Controllers
         public IActionResult Index(ListFile model)
         {
             string token = HttpContext.Session.GetString("Session.Token");
-            if (string.IsNullOrEmpty(token))
+            string username = HttpContext.Session.GetString("Session.Username");
+            string password = HttpContext.Session.GetString("Session.Password");
+
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
                 HttpContext.Session.Clear();
                 return RedirectToAction("Login", "Accounts");
             }
 
-            var response = new RequestHelper(factory).GetRequest("api/Files/GetAllFile", token);
-            if (response.StatusCode == 200)
+            TblUser u = new ApitemplatereportContext().TblUsers.Where(x => x.Username == username).FirstOrDefault();
+            var validatetoken = new RequestHelper(factory).PostRequest("api/Token/ValidateToken", token, u);
+
+            if(validatetoken.StatusCode == 200)
             {
-                model.FileList = JsonConvert.DeserializeObject<List<TblFileDetail>>(response.Content.ToString());
-                return View(model);
-            }    
-                
+                var us = JsonConvert.DeserializeObject<UserLogin>(validatetoken.Content.ToString());
+                string newPass = new HashMd5().CreateMD5Hash(us.Password);
+                if(newPass == password)
+                {
+                    var response = new RequestHelper(factory).GetRequest("api/Files/GetAllFile", token);
+                    if (response.StatusCode == 200)
+                    {
+                        model.FileList = JsonConvert.DeserializeObject<List<TblFileDetail>>(response.Content.ToString());
+                        return View(model);
+                    }
+                    else
+                    {
+                        HttpContext.Session.Clear();
+                        return RedirectToAction("Login", "Accounts");
+                    }
+                }
+            }
+
             return View(null);
         }
 
@@ -79,11 +99,11 @@ namespace Jwt_Core1.Controllers
         [HttpPost]
         public IActionResult Download(string filename)
         {
-            var parameters = new Dictionary<string, string> { { "filename", filename } };
-            var encodedContent = new FormUrlEncodedContent(parameters);
+            //var parameters = new Dictionary<string, string> { { "filename", filename } };
+            //var encodedContent = new FormUrlEncodedContent(parameters);
 
             var response = new RequestHelper(factory).PostRequestStream("api/Files/Download",
-                HttpContext.Session.GetString("Session.Token"), encodedContent);
+                HttpContext.Session.GetString("Session.Token"), filename);
 
             if (response.Result.StatusCode == 200)
                 return new FileStreamResult(response.Result.Content as Stream,
@@ -98,32 +118,16 @@ namespace Jwt_Core1.Controllers
         [HttpPost]
         public IActionResult Delete(string filename)
         {
-            var parameters = new Dictionary<string, string> { { "filename", filename } };
-            var encodedContent = new FormUrlEncodedContent(parameters);
+            //var parameters = new Dictionary<string, string> { { "filename", filename } };
+            //var encodedContent = new FormUrlEncodedContent(parameters);
 
             var response = new RequestHelper(factory).PostRequest("api/Files/Delete",
-                HttpContext.Session.GetString("Session.Token"), encodedContent);
+                HttpContext.Session.GetString("Session.Token"), filename);
 
             if (response.StatusCode != 200)
                 ModelState.AddModelError("Error", "Delete Fail");
 
             return RedirectToAction("Index");
         }
-
-        //private string GetContentType(string path)
-        //{
-        //    var types = GetMimeTypes();
-        //    var ext = Path.GetExtension(path).ToLowerInvariant();
-        //    return types[ext];
-        //}
-
-        //private Dictionary<string, string> GetMimeTypes()
-        //{
-        //    return new Dictionary<string, string>
-        //    {
-        //        {".doc", "application/vnd.ms-word"},
-        //        {".docx", "application/vnd.ms-word"},
-        //    };
-        //}
     }
 }

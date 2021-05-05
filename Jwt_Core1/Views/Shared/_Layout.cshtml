@@ -21,29 +21,25 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="FileUpload" asp-action="Index">Upload</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="GenerateDocx" asp-action="Index">Generate Template</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Swagger" asp-action="Index">Swagger</a>
-                        </li>
                     </ul>
                 </div>
                 <div class="btn-group dropdown-menu-right float-right">
+                    <a class="btn btn-outline-warning" href="/swagger/index.html">
+                        Swagger
+                    </a>
                     @if (Context.Session.GetString("Session.Username") != null)
                     {
-                        <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <button type="button" class="btn btn-outline-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             @Context.Session.GetString("Session.Username")
                         </button>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">Upload File</a>
-                            <a class="dropdown-item" href="#">Generate Template</a>
-                            <a class="dropdown-item" href="#">Something else here</a>
+                            <a class="dropdown-item" asp-controller="FileUpload" asp-action="Index">Upload File</a>
+                            <a class="dropdown-item" asp-controller="GenerateDocx" asp-action="Index">Generate Template</a>
                             <div class="dropdown-divider"></div>
                             @using (Html.BeginForm("Logout", "Accounts", FormMethod.Post))
                             {
@@ -53,7 +49,7 @@
                     }
                     else
                     {
-                        <a class="btn btn-outline-info float-right" asp-action="Login" asp-controller="Accounts">
+                        <a class="btn btn-outline-info" asp-action="Login" asp-controller="Accounts">
                             Login
                         </a>
                     }
@@ -69,7 +65,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2021 - Jwt_Core1 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2021 - Jwt_Core
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

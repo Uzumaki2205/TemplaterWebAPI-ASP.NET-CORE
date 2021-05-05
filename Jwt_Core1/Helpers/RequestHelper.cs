@@ -41,6 +41,12 @@ namespace Jwt_Core1.Helpers
             return new Response();
         }
 
+        /// <summary>
+        /// Post FormUrlEncoded
+        /// </summary>
+        /// <param name="uriAPI"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
         public Response PostRequest(string uriAPI, FormUrlEncodedContent content)
         {
             HttpClient client = factory.CreateClient("callapi");
@@ -51,6 +57,49 @@ namespace Jwt_Core1.Helpers
             return new Response();
         }
 
+        /// <summary>
+        /// Post Json Object
+        /// </summary>
+        /// <param name="uriAPI"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public Response PostRequest(string uriAPI, Object content)
+        {
+            HttpClient client = factory.CreateClient("callapi");
+            var response = client.PostAsync(uriAPI, new StringContent(JsonConvert.SerializeObject(content), 
+                System.Text.Encoding.UTF8, "application/json")).Result;
+
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                return JsonConvert.DeserializeObject<Response>(response.Content.ReadAsStringAsync().Result);
+            return new Response();
+        }
+
+        /// <summary>
+        /// Post Json Object
+        /// </summary>
+        /// <param name="uriAPI"></param>
+        /// <param name="token"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public Response PostRequest(string uriAPI, string token, Object content)
+        {
+            HttpClient client = factory.CreateClient("callapi");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = client.PostAsync(uriAPI, new StringContent(JsonConvert.SerializeObject(content),
+                System.Text.Encoding.UTF8, "application/json")).Result;
+
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                return JsonConvert.DeserializeObject<Response>(response.Content.ReadAsStringAsync().Result);
+            return new Response();
+        }
+
+        /// <summary>
+        /// Post FormUrlEncoded With token
+        /// </summary>
+        /// <param name="uriAPI"></param>
+        /// <param name="token"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
         public Response PostRequest(string uriAPI, string token, FormUrlEncodedContent content)
         {
             HttpClient client = factory.CreateClient("callapi");
@@ -62,6 +111,58 @@ namespace Jwt_Core1.Helpers
                 return JsonConvert.DeserializeObject<Response>(response.Content.ReadAsStringAsync().Result);
             return new Response();
         }
+
+        public async Task<Response> PostRequestStream(string uriAPI, Object content)
+        {
+            HttpClient client = factory.CreateClient("callapi");
+            var response = client.PostAsync(uriAPI, new StringContent(JsonConvert.SerializeObject(content),
+                System.Text.Encoding.UTF8, "application/json")).Result;
+
+            var stream = new MemoryStream(System.Text.Encoding.ASCII.GetBytes(await response.Content.ReadAsStringAsync()));
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                return new Response
+                {
+                    StatusCode = 200,
+                    Content = stream,
+                    Message = "Downloading"
+                };
+            return new Response();
+        }
+
+        public async Task<Response> PostRequestStream(string uriAPI, string token, Object content)
+        {
+            HttpClient client = factory.CreateClient("callapi");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = client.PostAsync(uriAPI, new StringContent(JsonConvert.SerializeObject(content),
+                System.Text.Encoding.UTF8, "application/json")).Result;
+
+            var stream = new MemoryStream(System.Text.Encoding.ASCII.GetBytes(await response.Content.ReadAsStringAsync()));
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                return new Response
+                {
+                    StatusCode = 200,
+                    Content = stream,
+                    Message = "Downloading"
+                };
+            return new Response();
+        }
+
+        //public async Task<Response> PostRequestStream(string uriAPI, FormUrlEncodedContent content)
+        //{
+        //    HttpClient client = factory.CreateClient("callapi");
+        //    client.DefaultRequestHeaders.Add("Accept", "application/x-www-form-urlencoded");
+        //    var response = client.PostAsync(uriAPI, content).Result;
+
+        //    var stream = new MemoryStream(System.Text.Encoding.ASCII.GetBytes(await response.Content.ReadAsStringAsync()));
+        //    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        //        return new Response
+        //        {
+        //            StatusCode = 200,
+        //            Content = stream,
+        //            Message = "Downloading"
+        //        };
+        //    return new Response();
+        //}
 
         public async Task<Response> PostRequestStream(string uriAPI, string token, FormUrlEncodedContent content)
         {
@@ -81,7 +182,16 @@ namespace Jwt_Core1.Helpers
             return new Response();
         }
 
+        public Response PostRequest(string uriAPI, MultipartFormDataContent content)
+        {
+            HttpClient client = factory.CreateClient("callapi");
+            client.DefaultRequestHeaders.Add("Accept", "application/x-www-form-urlencoded");
+            var response = client.PostAsync(uriAPI, content).Result;
 
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                return JsonConvert.DeserializeObject<Response>(response.Content.ReadAsStringAsync().Result);
+            return new Response();
+        }
         public Response PostRequest(string uriAPI, string token, MultipartFormDataContent content)
         {
             HttpClient client = factory.CreateClient("callapi");

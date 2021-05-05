@@ -1,5 +1,6 @@
 ﻿using Jwt_Core1.Models;
 using Jwt_Core1.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Jwt_Core1.Controllers.API
 {
@@ -26,8 +26,23 @@ namespace Jwt_Core1.Controllers.API
 
         public InfoVuln info { get; set; }
 
+        [HttpGet("GetAllFile")]
+        public Response GetAllFile()
+        {
+            using (ApitemplatereportContext context = new ApitemplatereportContext())
+            {
+                //TblFileDetailFileId
+                var allFiles = context.TblFileDetails.Select(x => x).ToList();
+                if (allFiles != null)
+                {
+                    List<TblFileDetail> list = new List<TblFileDetail>(allFiles);
+                    return new Response { StatusCode = 200, Message = "All Files Uploaded", Content = list };
+                }
+            }
+            return new Response();
+        }
 
-        [HttpGet("Generate")]
+        [HttpPost("Generate")]
         public Response Generate([FromForm] IFormFile files, [FromForm] string templatename)
         {
             var fileExt = Path.GetExtension(files.FileName).Substring(1);
@@ -50,11 +65,31 @@ namespace Jwt_Core1.Controllers.API
                     info.TimeStamp + ".json");
                 info.ProcessDocx(templatename, Jsonpath);
 
-                return new Response { StatusCode = 200, Content = info.TimeStamp + ".Report.docx", Message = "Generate Success" };
+                return new Response 
+                { 
+                    StatusCode = 200, 
+                    Content = info.TimeStamp + ".Report.docx", 
+                    Message = "Generate Success" 
+                };
             }
             catch (Exception ex)
             {
                 return new Response { StatusCode = 404, Content = ex.Message, Message = "Fail To Generate" };
+            }
+        }
+
+        [HttpPost("Download")]
+        public IActionResult Download([FromBody] FileDownload file)
+        {
+            try
+            {
+                var path = _rootPath.WebRootPath + "\\Renders\\" + file.filename;
+                var stream = System.IO.File.OpenRead(path);
+                return new FileStreamResult(stream, "application/octet-stream");
+            }
+            catch (Exception)
+            {
+                return NotFound();
             }
         }
     }

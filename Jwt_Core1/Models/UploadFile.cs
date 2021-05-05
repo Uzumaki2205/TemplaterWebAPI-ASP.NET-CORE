@@ -7,4 +7,9 @@ namespace Jwt_Core1.Models
         public string  templatename { get; set; }
         public IFormFile file { get; set; }
     }
+
+    public class FileDownload
+    {
+        public string filename { get; set; }
+    }
 }

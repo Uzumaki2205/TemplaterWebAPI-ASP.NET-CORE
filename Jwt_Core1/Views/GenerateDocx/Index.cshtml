@@ -14,9 +14,11 @@
                 <div class="form-inline">
                     <div class="form-group">
                         <div class="col-md-10">
-                            @Html.DropDownList("templatename", 
-                           new SelectList(Model.FileList.Select(p => p.Filename)), 
-                           "-- Select Template --")
+                           
+                                @Html.DropDownList("templatename",
+                                new SelectList(Model.FileList.Select(p => p.Filename)),
+                                "-- Select Template --")
+                            
                         </div>
                     </div>
                 </div>

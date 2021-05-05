@@ -1,7 +1,13 @@
 ﻿using Jwt_Core1.Models;
+using Jwt_Core1.Models.Entities;
 using Jwt_Core1.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Text.Json;
 
 namespace Jwt_Core1.Controllers.API
 {
@@ -17,20 +23,30 @@ namespace Jwt_Core1.Controllers.API
         }
 
         [HttpPost("GenerateToken")]
-        public Object GenerateToken([FromForm]string username)
+        public Response GenerateToken([FromBody] UserLogin userParams)
         {
-            return new Response { StatusCode = 200, Content = _tokenService.GenerateToken(username), Message = "Token Generated" };
+            TblUser u = new UserService().Authenticate(userParams.Username, userParams.Password);
+            if(u != null)
+                return new Response
+                {
+                    StatusCode = 200,
+                    Content = _tokenService.GenerateToken(userParams.Username),
+                    Message = "Token Generated Success"
+                };
+            return new Response();
         }
 
+        [Authorize]
         [HttpPost("ValidateToken")]
-        public Response ValidateToken([FromForm] string token, string password)
+        public Response ValidateToken([FromBody] UserLogin users)
         {
-            string username = _tokenService.ValidateToken(token);
-            Models.Entities.TblUser user = new UserService().Authenticate(username, password);
+            string token = Request.Headers["Authorization"];
+            var usernameRender = _tokenService.ValidateToken(token.Replace("Bearer ", ""));
 
-            if(user != null)
-                return new Response { StatusCode = 200, Content = _tokenService.ValidateToken(token), Message = "User validated" };
-            return new Response { StatusCode = 401, Content = "UnAuthenticate", Message = "Validate Failed!!"};
+            var user = new UserService().Authenticate(users.Username, users.Password);
+            if(user != null && user.Username == usernameRender)
+                return new Response { StatusCode = 200, Content = JsonConvert.SerializeObject(users), Message = "User Validated" };
+            return new Response { StatusCode = 401, Content = "UnAuthenticate", Message = "Validate Failed!!" };
         }
     }
 }
