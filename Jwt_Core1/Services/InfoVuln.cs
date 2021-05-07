@@ -18,7 +18,6 @@ namespace Jwt_Core1.Models
         public InfoVuln()
         { 
             TimeStamp = GetTimestamp(DateTime.Now); 
-            CreateFolder(); 
         }
 
         private String GetTimestamp(DateTime value)
@@ -68,6 +67,7 @@ namespace Jwt_Core1.Models
 
         public void MainProcess(string nameTemplate, string json)
         {
+            CreateFolder();
             infoObject = new List<Object>();
             tableObject = new List<Object>();
 

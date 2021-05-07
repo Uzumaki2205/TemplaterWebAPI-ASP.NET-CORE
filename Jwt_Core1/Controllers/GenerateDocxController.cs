@@ -7,10 +7,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.Net.Http.Headers;
 
 namespace Jwt_Core1.Controllers
 {
@@ -63,13 +60,9 @@ namespace Jwt_Core1.Controllers
                     multiContent.Add(bytes, "files", file.FileName);
                     multiContent.Add(new StringContent(templatename));
 
-                    //var res = new RequestHelper(factory).PostRequest("api/FillDocx/Generate",
-                    //    HttpContext.Session.GetString("Session.Token"), multiContent);
                     var res = new RequestHelper(factory).PostRequest("api/FillDocx/Generate", multiContent);
                     if (res.StatusCode == 200)
-                    {
-                        return Download(res.Content.ToString());
-                    }
+                        return Download(new FileDownload { filename = res.Content.ToString() });
                 }
                 return BadRequest();
             }
@@ -78,17 +71,14 @@ namespace Jwt_Core1.Controllers
                 return NotFound();
             }
         }
-        public IActionResult Download(string file)
+        public IActionResult Download(FileDownload file)
         {
-            FileDownload files = new FileDownload() { filename = file };
-            var response = new RequestHelper(factory).PostRequestStream("api/FillDocx/Download", files);
+            //FileDownload files = new FileDownload() { filename = file.filename };
+            var response = new RequestHelper(factory).PostRequestStream("api/FillDocx/Download", file);
 
             if (response.Result.StatusCode == 200)
-                return new FileStreamResult(response.Result.Content as Stream,
-                    new MediaTypeHeaderValue("application/octet-stream"))
-                {
-                    FileDownloadName = file
-                };
+                return new FileStreamResult(response.Result.Content as Stream, "application/octec-stream")
+                { FileDownloadName = file.filename };
 
             return RedirectToAction("Index");
         }

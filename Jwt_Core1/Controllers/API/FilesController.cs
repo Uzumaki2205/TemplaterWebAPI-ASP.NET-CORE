@@ -3,6 +3,7 @@ using Jwt_Core1.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,17 +30,23 @@ namespace Jwt_Core1.Controllers.API
         [HttpGet("GetAllFile")]
         public Response GetAllFile()
         {
+            List<TblFileDetail> list = new List<TblFileDetail>();
             using (ApitemplatereportContext context = new ApitemplatereportContext())
             {
                 //TblFileDetailFileId
+
                 var allFiles = context.TblFileDetails.Select(x => x).ToList();
-                if (allFiles != null)
+                if (allFiles.Count != 0)
                 {
-                    List<TblFileDetail> list = new List<TblFileDetail>(allFiles);
-                    return new Response { StatusCode = 200, Message = "All File", Content = list };
+                    list = allFiles;
+                    var jsonList = JsonConvert.SerializeObject(list);
+                    return new Response { StatusCode = 200, Message = "All File", Content = jsonList };
                 }
             }
-            return new Response();
+
+            list.Add(new TblFileDetail());
+            var errList = JsonConvert.SerializeObject(list);
+            return new Response { StatusCode = 200, Message = "All File", Content = errList };
         }
         
         /// <summary>
@@ -90,20 +97,42 @@ namespace Jwt_Core1.Controllers.API
         /// <param name="filename"></param>
         /// <returns></returns>
         [HttpPost("Download")]
-        public IActionResult Download([FromBody] string filename)
+        public async System.Threading.Tasks.Task<IActionResult> Download([FromBody] FileDownload filename)
         {
             using (ApitemplatereportContext context = new ApitemplatereportContext())
             {
-                TblFileDetail file = context.TblFileDetails.Where(file => file.Filename == filename).FirstOrDefault();
+                TblFileDetail file = context.TblFileDetails.Where(file => file.Filename == filename.filename).FirstOrDefault();
                 if(file != null)
                 {
                     var path = _webHostEnvironment.WebRootPath + "\\Template\\" + file.Filename;
-                    var stream = System.IO.File.OpenRead(path);
-                    return new FileStreamResult(stream, "application/octet-stream");
-                }            
+
+                    try
+                    {
+                        var memory = new MemoryStream();
+                        using (var stream = System.IO.File.OpenRead(path))
+                            await stream.CopyToAsync(memory);
+                        memory.Position = 0;
+                        
+                        return new FileStreamResult(memory, "application/octec-stream");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex); 
+                    }
+                }
             }
 
             return NotFound();
+        }
+
+        private void CopyStream(Stream input, Stream output)
+        {
+            byte[] buffer = new byte[32768];
+            int read;
+            while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                output.Write(buffer, 0, read);
+            }
         }
 
         /// <summary>

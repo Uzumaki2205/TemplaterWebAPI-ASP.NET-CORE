@@ -3,7 +3,6 @@ using Jwt_Core1.Models;
 using Jwt_Core1.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -97,21 +96,15 @@ namespace Jwt_Core1.Controllers
         }
 
         [HttpPost]
-        public IActionResult Download(string filename)
+        public IActionResult Download(FileDownload file)
         {
-            //var parameters = new Dictionary<string, string> { { "filename", filename } };
-            //var encodedContent = new FormUrlEncodedContent(parameters);
-
             var response = new RequestHelper(factory).PostRequestStream("api/Files/Download",
-                HttpContext.Session.GetString("Session.Token"), filename);
+                HttpContext.Session.GetString("Session.Token"), file);
 
             if (response.Result.StatusCode == 200)
-                return new FileStreamResult(response.Result.Content as Stream,
-                    new MediaTypeHeaderValue("application/octet-stream"))
-                {
-                    FileDownloadName = filename
-                };
-
+                return new FileStreamResult(response.Result.Content as Stream, "application/octet-stream") 
+                { FileDownloadName = file.filename };
+               
             return RedirectToAction("Index");
         }
 

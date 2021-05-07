@@ -1,13 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Jwt_Core1.Services;
-using Jwt_Core1.Models.Entities;
-using System;
 using System.Net.Http;
-using System.Collections.Generic;
 using Jwt_Core1.Helpers;
 using Jwt_Core1.Models;
-using Microsoft.AspNetCore.Http;
 
 namespace Jwt_Core.Controllers.API
 {

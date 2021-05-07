@@ -140,7 +140,7 @@ namespace Jwt_Core1
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Accounts}/{action=Login}/{id?}");
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

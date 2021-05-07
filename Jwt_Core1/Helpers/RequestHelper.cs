@@ -1,13 +1,9 @@
 ﻿using Jwt_Core1.Models;
-using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace Jwt_Core1.Helpers
 {
@@ -112,23 +108,35 @@ namespace Jwt_Core1.Helpers
             return new Response();
         }
 
+        /// <summary>
+        /// Post Request Stream With Param Object
+        /// </summary>
+        /// <param name="uriAPI"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
         public async Task<Response> PostRequestStream(string uriAPI, Object content)
         {
             HttpClient client = factory.CreateClient("callapi");
             var response = client.PostAsync(uriAPI, new StringContent(JsonConvert.SerializeObject(content),
                 System.Text.Encoding.UTF8, "application/json")).Result;
 
-            var stream = new MemoryStream(System.Text.Encoding.ASCII.GetBytes(await response.Content.ReadAsStringAsync()));
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 return new Response
                 {
                     StatusCode = 200,
-                    Content = stream,
+                    Content = await response.Content.ReadAsStreamAsync(),
                     Message = "Downloading"
                 };
             return new Response();
         }
 
+        /// <summary>
+        /// Post request with param Object + token
+        /// </summary>
+        /// <param name="uriAPI"></param>
+        /// <param name="token"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
         public async Task<Response> PostRequestStream(string uriAPI, string token, Object content)
         {
             HttpClient client = factory.CreateClient("callapi");
@@ -136,21 +144,21 @@ namespace Jwt_Core1.Helpers
             var response = client.PostAsync(uriAPI, new StringContent(JsonConvert.SerializeObject(content),
                 System.Text.Encoding.UTF8, "application/json")).Result;
 
-            var stream = new MemoryStream(System.Text.Encoding.ASCII.GetBytes(await response.Content.ReadAsStringAsync()));
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 return new Response
                 {
                     StatusCode = 200,
-                    Content = stream,
+                    Content = await response.Content.ReadAsStreamAsync(),
                     Message = "Downloading"
                 };
             return new Response();
         }
 
-        //public async Task<Response> PostRequestStream(string uriAPI, FormUrlEncodedContent content)
+        //public async Task<Response> PostRequestStream(string uriAPI, string token, FormUrlEncodedContent content)
         //{
         //    HttpClient client = factory.CreateClient("callapi");
         //    client.DefaultRequestHeaders.Add("Accept", "application/x-www-form-urlencoded");
+        //    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         //    var response = client.PostAsync(uriAPI, content).Result;
 
         //    var stream = new MemoryStream(System.Text.Encoding.ASCII.GetBytes(await response.Content.ReadAsStringAsync()));
@@ -163,24 +171,6 @@ namespace Jwt_Core1.Helpers
         //        };
         //    return new Response();
         //}
-
-        public async Task<Response> PostRequestStream(string uriAPI, string token, FormUrlEncodedContent content)
-        {
-            HttpClient client = factory.CreateClient("callapi");
-            client.DefaultRequestHeaders.Add("Accept", "application/x-www-form-urlencoded");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = client.PostAsync(uriAPI, content).Result;
-
-            var stream = new MemoryStream(System.Text.Encoding.ASCII.GetBytes(await response.Content.ReadAsStringAsync()));
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
-                return new Response
-                {
-                    StatusCode = 200,
-                    Content = stream,
-                    Message = "Downloading"
-                };
-            return new Response();
-        }
 
         public Response PostRequest(string uriAPI, MultipartFormDataContent content)
         {
