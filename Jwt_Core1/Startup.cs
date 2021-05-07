@@ -63,9 +63,17 @@ namespace Jwt_Core1
 
 
             // Add HttpClientFactory
+            //services.AddHttpClient("callapi", client =>
+            //{
+            //    client.BaseAddress = new Uri("https://localhost:44312/");
+            //});
+            // Add httpclientfactory with SSL certificate
             services.AddHttpClient("callapi", client =>
             {
                 client.BaseAddress = new Uri("https://localhost:44312/");
+            }).ConfigurePrimaryHttpMessageHandler(() => new System.Net.Http.HttpClientHandler()
+            {
+                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
             });
 
             var appSettingsSection = Configuration.GetSection("AppSettings");
