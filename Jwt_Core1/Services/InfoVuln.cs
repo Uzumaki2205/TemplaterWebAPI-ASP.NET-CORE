@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Net;
 
 namespace Jwt_Core1.Models
 {
@@ -96,7 +97,8 @@ namespace Jwt_Core1.Models
                             if (property.Name.StartsWith("image-"))
                             {
                                 string valueImage = ProcessImage(property);
-                                obj_Property.Add(property.Name, valueImage + ".jpg");
+                                //obj_Property.Add(property.Name, valueImage + ".jpg");
+                                obj_Property.Add(property.Name, valueImage);
                             }
                             else obj_Property.Add(property.Name, property.Value.ToString());
                         }
@@ -182,7 +184,8 @@ namespace Jwt_Core1.Models
                                 if (subItem.Name.StartsWith("image-"))
                                 {
                                     string valueImage = ProcessImage(subItem);
-                                    dicObj.Add(subItem.Name, valueImage + ".jpg");
+                                    //dicObj.Add(subItem.Name, valueImage + ".jpg");
+                                    dicObj.Add(subItem.Name, valueImage);
                                 }
                                 else dicObj.Add(subItem.Name, subItem.Value.ToString());
                             }
@@ -213,13 +216,27 @@ namespace Jwt_Core1.Models
             return color;
         }
 
-        private string ProcessImage(JProperty image)
-        {
-            Random r = new Random();
-            string temp = r.Next(500).ToString();
-            Base64ToImage(image.Value.ToString(), temp);
+        //private string ProcessImage(JProperty image)
+        //{
+        //    Random r = new Random();
+        //    string temp = r.Next(500).ToString();
+        //    Base64ToImage(image.Value.ToString(), temp);
 
-            return temp;
+        //    return temp;
+        //}
+        private string ProcessImage(JProperty imageUrl)
+        {
+            string url = imageUrl.Value.ToString();
+            using (WebClient client = new WebClient())
+            {
+                Random r = new Random();
+                string name = r.Next(500).ToString() + url.Substring(url.Length-4, 4);
+                //string name = r.Next(500).ToString();
+                client.DownloadFile(new Uri(url),
+                    Path.Combine(rootPath, "Static", $"{TimeStamp}\\{name}"));
+
+                return name;
+            }
         }
 
         //Convert Base64 to Image

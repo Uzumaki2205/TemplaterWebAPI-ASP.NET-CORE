@@ -59,8 +59,8 @@ namespace Jwt_Core1.Controllers.API
             return new Response { StatusCode = 200, Message = "All File", Content = errList };
         }
 
-        [HttpPost("Generate")]
-        public Response Generate([FromForm] IFormFile files, [FromForm] string templatename)
+        [HttpPost("GenerateWithFile")]
+        public Response GenerateWithFile([FromForm] IFormFile files, [FromForm] string templatename)
         {
             var fileExt = Path.GetExtension(files.FileName).Substring(1);
             if (fileExt != "json")
@@ -87,6 +87,25 @@ namespace Jwt_Core1.Controllers.API
                     StatusCode = 200, 
                     Content = info.TimeStamp + ".Report.docx", 
                     Message = "Generate Success" 
+                };
+            }
+            catch (Exception ex)
+            {
+                return new Response { StatusCode = 404, Content = ex.Message, Message = "Fail To Generate" };
+            }
+        }
+
+        [HttpPost("Generate")]
+        public Response Generate(FileGenerate file)
+        {
+            try
+            {
+                info.ProcessDocxJson(file.templatename, file.content);
+                return new Response
+                {
+                    StatusCode = 200,
+                    Content = info.TimeStamp + ".Report.docx",
+                    Message = "Generate Success"
                 };
             }
             catch (Exception ex)

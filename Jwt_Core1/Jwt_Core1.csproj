@@ -2025,6 +2025,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="wwwroot\Renders\" />
+    <Folder Include="wwwroot\Static\" />
     <Folder Include="wwwroot\Template\" />
     <Folder Include="wwwroot\UploadedFiles\" />
   </ItemGroup>

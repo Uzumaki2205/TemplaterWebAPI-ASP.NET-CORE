@@ -4,7 +4,7 @@
     <div class="col-md-10">
         <h2>Generate Template</h2>
         <hr />
-        @using (Html.BeginForm("Generate", "GenerateDocx", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        @using (Html.BeginForm("GenerateWithFile", "GenerateDocx", FormMethod.Post, new { enctype = "multipart/form-data" }))
         {
             @Html.AntiForgeryToken()
             @Html.ValidationSummary(true, "", new { @class = "text-danger" })
@@ -36,6 +36,41 @@
                         <div class="col-md-offset-2 col-md-10">
                             <input type="submit" value="Generate" class="btn btn-success" />
                         </div>
+                    </div>
+                </div>
+            </div>
+         }
+
+        <br />
+
+        @using (Html.BeginForm("Generate", "GenerateDocx", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="row">
+                <label class="col-md-2 control-label">Choose Template</label>
+                <div class="form-inline">
+                    <div class="form-group">
+                        <div class="col-md-10">
+                           
+                                @Html.DropDownList("templatename",
+                                new SelectList(Model.FileList.Select(p => p.Filename)),
+                                "-- Select Template --")
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <label class="col-md-2 control-label">Content Json</label>
+                <div class="form-group">
+                    <textarea class="form-control" id="content" name="content" rows="3" style="width:400px" required="required"></textarea>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="submit" value="Generate" class="btn btn-success" />
                     </div>
                 </div>
             </div>

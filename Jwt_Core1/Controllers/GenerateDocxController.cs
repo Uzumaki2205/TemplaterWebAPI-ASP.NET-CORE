@@ -39,7 +39,7 @@ namespace Jwt_Core1.Controllers
         }
 
         [HttpPost]
-        public IActionResult Generate(string templatename, IFormFile file)
+        public IActionResult GenerateWithFile(string templatename, IFormFile file)
         {
             var fileExt = Path.GetExtension(file.FileName).Substring(1);
             if (fileExt != "json")
@@ -60,17 +60,28 @@ namespace Jwt_Core1.Controllers
                     multiContent.Add(bytes, "files", file.FileName);
                     multiContent.Add(new StringContent(templatename));
 
-                    var res = new RequestHelper(factory).PostRequest("api/FillDocx/Generate", multiContent);
+                    var res = new RequestHelper(factory).PostRequest("api/FillDocx/GenerateWithFile", multiContent);
                     if (res.StatusCode == 200)
                         return Download(new FileDownload { filename = res.Content.ToString() });
                 }
                 return BadRequest();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 return NotFound();
             }
         }
+
+        [HttpPost]
+        public IActionResult Generate(FileGenerate file)
+        {
+            var res = new RequestHelper(factory).PostRequest("api/FillDocx/Generate", file);
+            if (res.StatusCode == 200)
+                return Download(new FileDownload { filename = res.Content.ToString() });
+            return BadRequest();
+        }
+
         public IActionResult Download(FileDownload file)
         {
             //FileDownload files = new FileDownload() { filename = file.filename };
