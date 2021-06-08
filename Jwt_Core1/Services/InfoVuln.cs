@@ -97,8 +97,8 @@ namespace Jwt_Core1.Models
                             if (property.Name.StartsWith("image-"))
                             {
                                 string valueImage = ProcessImage(property);
-                                //obj_Property.Add(property.Name, valueImage + ".jpg");
-                                obj_Property.Add(property.Name, valueImage);
+                                obj_Property.Add(property.Name, valueImage + ".jpg"); // => Base64
+                                //obj_Property.Add(property.Name, valueImage); // => From Url
                             }
                             else obj_Property.Add(property.Name, property.Value.ToString());
                         }
@@ -170,22 +170,32 @@ namespace Jwt_Core1.Models
                                         if (array2p2.Name.StartsWith("color-"))
                                             array2p.Add("Color", ProcessColor(array2p2));
 
-                                        array2p.Add(array2p2.Name, array2p2.Value.ToString());
+                                        else if (array2p2.Name.StartsWith("image-"))
+                                        {
+                                            string valueImage = ProcessImage(array2p2);
+                                            array2p.Add(array2p2.Name, valueImage + ".jpg"); // From Base64
+                                            //array2p.Add(array2p2.Name, valueImage); // From Url
+                                        }
+                                        //-> Test Image
+
+                                        else array2p.Add(array2p2.Name, array2p2.Value.ToString());
                                     }
                                     lstArr2.Add(array2p);
+                                    //array.Path
                                 }
-                                dic.Add(subItem.Name, lstArr2);
+                                //dic.Add(subItem.Name, lstArr2);
+                                dic.Add(array.Path + "." + subItem.Name, lstArr2); //->Test Array Table
                             }
                             else
                             {
                                 if (subItem.Name.StartsWith("color-"))
                                     dicObj.Add("Color", ProcessColor(subItem));
 
-                                if (subItem.Name.StartsWith("image-"))
+                                else if(subItem.Name.StartsWith("image-"))
                                 {
                                     string valueImage = ProcessImage(subItem);
-                                    //dicObj.Add(subItem.Name, valueImage + ".jpg");
-                                    dicObj.Add(subItem.Name, valueImage);
+                                    dicObj.Add(subItem.Name, valueImage + ".jpg"); // From base 64
+                                    //dicObj.Add(subItem.Name, valueImage); // From Url
                                 }
                                 else dicObj.Add(subItem.Name, subItem.Value.ToString());
                             }
@@ -204,40 +214,42 @@ namespace Jwt_Core1.Models
         {
             Color color = Color.Transparent;
 
-            if (property.Value.ToString().ToLower().Equals("critical") || property.Value.ToString().ToLower().Equals("nguy hiểm"))
-                color = Color.DeepPink;
+            if (property.Value.ToString().ToLower().Equals("critical") || property.Value.ToString().ToLower().Equals("nguy hiểm") 
+                || property.Value.ToString().ToLower().Equals("nghiêm trọng"))
+                color = ColorTranslator.FromHtml("#FFC0CB");
             else if (property.Value.ToString().ToLower().Equals("high") || property.Value.ToString().ToLower().Equals("cao"))
-                color = Color.Red;
+                color = ColorTranslator.FromHtml("#FF0000");
             else if (property.Value.ToString().ToLower().Equals("medium") || property.Value.ToString().ToLower().Equals("trung bình"))
-                color = Color.Orange;
+                color = ColorTranslator.FromHtml("#FFC000");
             else if (property.Value.ToString().ToLower().Equals("low") || property.Value.ToString().ToLower().Equals("thấp"))
-                color = Color.Yellow;
+                color = ColorTranslator.FromHtml("#FFFF00");
 
             return color;
         }
 
-        //private string ProcessImage(JProperty image)
-        //{
-        //    Random r = new Random();
-        //    string temp = r.Next(500).ToString();
-        //    Base64ToImage(image.Value.ToString(), temp);
-
-        //    return temp;
-        //}
-        private string ProcessImage(JProperty imageUrl)
+        private string ProcessImage(JProperty image)
         {
-            string url = imageUrl.Value.ToString();
-            using (WebClient client = new WebClient())
-            {
-                Random r = new Random();
-                string name = r.Next(500).ToString() + url.Substring(url.Length-4, 4);
-                //string name = r.Next(500).ToString();
-                client.DownloadFile(new Uri(url),
-                    Path.Combine(rootPath, "Static", $"{TimeStamp}\\{name}"));
+            Random r = new Random();
+            string temp = r.Next(500).ToString();
+            Base64ToImage(image.Value.ToString(), temp);
 
-                return name;
-            }
+            return temp;
         }
+
+        //private string ProcessImage(JProperty imageUrl)
+        //{
+        //    string url = imageUrl.Value.ToString();
+        //    using (WebClient client = new WebClient())
+        //    {
+        //        Random r = new Random();
+        //        string name = r.Next(500).ToString() + url.Substring(url.Length - 4, 4);
+        //        //string name = r.Next(500).ToString();
+        //        client.DownloadFile(new Uri(url),
+        //            Path.Combine(rootPath, "Static", $"{TimeStamp}\\{name}"));
+
+        //        return name;
+        //    }
+        //}
 
         //Convert Base64 to Image
         private void Base64ToImage(string base64, string name)

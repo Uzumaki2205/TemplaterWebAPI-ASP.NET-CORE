@@ -91,7 +91,7 @@ namespace Jwt_Core1.Controllers.API
             }
             catch (Exception ex)
             {
-                return new Response { StatusCode = 404, Content = ex.Message, Message = "Fail To Generate" };
+                return new Response { StatusCode = 404, Content = ex.Message, Message = ex.Message };
             }
         }
 
@@ -110,7 +110,7 @@ namespace Jwt_Core1.Controllers.API
             }
             catch (Exception ex)
             {
-                return new Response { StatusCode = 404, Content = ex.Message, Message = "Fail To Generate" };
+                return new Response { StatusCode = 404, Content = ex.Message, Message = ex.Message };
             }
         }
 

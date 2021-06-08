@@ -1,4 +1,4 @@
-﻿{
+{
   "Version": [
     {
       "stt": "1",
@@ -63,9 +63,9 @@
       ],
       "Request": "",
       "Response": "",
-      "image-Vuln": "https://p.bigstockphoto.com/GeFvQkBbSLaMdpKXF1Zv_bigstock-Aerial-View-Of-Blue-Lakes-And--227291596.jpg"
+	  "image-Vuln": "https://p.bigstockphoto.com/GeFvQkBbSLaMdpKXF1Zv_bigstock-Aerial-View-Of-Blue-Lakes-And--227291596.jpg"
     },
-    {
+	{
       "Name_Vuln": "Name Vuln 2",
       "Risk_Vuln": "High",
       "Affect_Vuln": "Cao",
@@ -86,7 +86,7 @@
       ],
       "Request": "",
       "Response": "",
-      "image-Vuln": "https://cdn.jpegmini.com/user/images/slider_puffin_before_mobile.jpg"
+	  "image-Vuln": "https://cdn.jpegmini.com/user/images/slider_puffin_before_mobile.jpg"
     }
   ]
 }
