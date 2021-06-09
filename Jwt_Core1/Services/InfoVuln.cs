@@ -65,7 +65,7 @@ namespace Jwt_Core1.Models
         {
             MainProcess(nameTemplate, json);
         }
-
+        
         public void MainProcess(string nameTemplate, string json)
         {
             CreateFolder();
@@ -84,6 +84,7 @@ namespace Jwt_Core1.Models
             .Include(ImageMaxSize)  //setup image resizing via maxSize(X, Y) metadata
             .Include(ColorConverter)    //setup image from color converter
             .Build();
+
             
             JObject jObject = JObject.Parse(json);
             using (var doc = factory.Open(Path.Combine(rootPath, "Renders", $"{TimeStamp}.Report.docx")))
@@ -96,8 +97,12 @@ namespace Jwt_Core1.Models
                         {
                             if (property.Name.StartsWith("image-"))
                             {
-                                string valueImage = ProcessImage(property);
-                                obj_Property.Add(property.Name, valueImage + ".jpg"); // => Base64
+                                if (property.Value.ToString() != string.Empty && TryGetFromBase64String(property.Value.ToString()))
+                                {
+                                    string valueImage = ProcessImage(property);
+                                    obj_Property.Add(property.Name, valueImage); // => Base64
+                                }
+
                                 //obj_Property.Add(property.Name, valueImage); // => From Url
                             }
                             else obj_Property.Add(property.Name, property.Value.ToString());
@@ -134,7 +139,7 @@ namespace Jwt_Core1.Models
                             infoObject.Add(obj_Property);
 
                             doc.Process(infoObject);
-                            doc.Process(temp); //bảng
+                            doc.Process(temp); //table
                         }
                     }
                 }
@@ -172,9 +177,11 @@ namespace Jwt_Core1.Models
 
                                         else if (array2p2.Name.StartsWith("image-"))
                                         {
-                                            string valueImage = ProcessImage(array2p2);
-                                            array2p.Add(array2p2.Name, valueImage + ".jpg"); // From Base64
-                                            //array2p.Add(array2p2.Name, valueImage); // From Url
+                                            if (array2p2.Value.ToString() != string.Empty && TryGetFromBase64String(array2p2.Value.ToString()))
+                                            {
+                                                string valueImage = ProcessImage(array2p2);
+                                                array2p.Add(array2p2.Name, valueImage);
+                                            }
                                         }
                                         //-> Test Image
 
@@ -184,7 +191,7 @@ namespace Jwt_Core1.Models
                                     //array.Path
                                 }
                                 //dic.Add(subItem.Name, lstArr2);
-                                dic.Add(array.Path + "." + subItem.Name, lstArr2); //->Test Array Table
+                                dic.Add(array.Path.Replace(".", "") + subItem.Name, lstArr2); //->Test Array Table
                             }
                             else
                             {
@@ -193,8 +200,12 @@ namespace Jwt_Core1.Models
 
                                 else if(subItem.Name.StartsWith("image-"))
                                 {
-                                    string valueImage = ProcessImage(subItem);
-                                    dicObj.Add(subItem.Name, valueImage + ".jpg"); // From base 64
+                                    if (subItem.Value.ToString() != string.Empty && TryGetFromBase64String(subItem.Value.ToString()))
+                                    {
+                                        string valueImage = ProcessImage(subItem);
+                                        dicObj.Add(subItem.Name, valueImage); // From base64
+                                    }
+
                                     //dicObj.Add(subItem.Name, valueImage); // From Url
                                 }
                                 else dicObj.Add(subItem.Name, subItem.Value.ToString());
@@ -205,6 +216,7 @@ namespace Jwt_Core1.Models
 
                 dic.Add(array.Path, dicObj);
                 Dictionary_Looping.Add(dic);
+               
             }
 
             return Dictionary_Looping;
@@ -233,7 +245,7 @@ namespace Jwt_Core1.Models
             string temp = r.Next(500).ToString();
             Base64ToImage(image.Value.ToString(), temp);
 
-            return temp;
+            return temp + ".jpg";
         }
 
         //private string ProcessImage(JProperty imageUrl)
@@ -250,6 +262,20 @@ namespace Jwt_Core1.Models
         //        return name;
         //    }
         //}
+
+        private bool TryGetFromBase64String(string input)
+        {
+            byte[] output = null;
+            try
+            {
+                output = Convert.FromBase64String(input);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
 
         //Convert Base64 to Image
         private void Base64ToImage(string base64, string name)
