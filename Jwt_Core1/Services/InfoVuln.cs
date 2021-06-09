@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net;
 
 namespace Jwt_Core1.Models
@@ -85,7 +86,18 @@ namespace Jwt_Core1.Models
             .Include(ColorConverter)    //setup image from color converter
             .Build();
 
-            
+            // Action Remove Tag When Missing
+            Action<string, ITemplater, IEnumerable<string>, object> handleUnprocessed = (prefix, templater, tags, value) =>
+            {
+                foreach (var t in tags)
+                {
+                    var md = templater.GetMetadata(t, false);
+                    var missing = md.FirstOrDefault(it => it.StartsWith("missing("));
+                    if (missing != null)
+                        templater.Replace(t, missing.Substring("missing(".Length, missing.Length - 1 - "missing(".Length));
+                }
+            };
+
             JObject jObject = JObject.Parse(json);
             using (var doc = factory.Open(Path.Combine(rootPath, "Renders", $"{TimeStamp}.Report.docx")))
             {
@@ -97,7 +109,9 @@ namespace Jwt_Core1.Models
                         {
                             if (property.Name.StartsWith("image-"))
                             {
-                                if (property.Value.ToString() != string.Empty && TryGetFromBase64String(property.Value.ToString()))
+                                string unescapeString = UnescapeString(property.Value.ToString()); // Unescape String base64
+
+                                if (property.Value.ToString() != string.Empty && TryGetFromBase64String(unescapeString))
                                 {
                                     string valueImage = ProcessImage(property);
                                     obj_Property.Add(property.Name, valueImage); // => Base64
@@ -105,7 +119,7 @@ namespace Jwt_Core1.Models
 
                                 //obj_Property.Add(property.Name, valueImage); // => From Url
                             }
-                            else obj_Property.Add(property.Name, property.Value.ToString());
+                            else obj_Property.Add(property.Name, UnescapeString(property.Value.ToString()));
                         }
                         else if (item.Type == JTokenType.Object)
                         {
@@ -129,7 +143,7 @@ namespace Jwt_Core1.Models
                                         temp = ProcessTable(objArray);
                                     }
                                 }
-                                doc.Process(temp);
+                                doc.Process(temp); RemoveTagsWithMissing(doc.Templater);
                             }
                         }
                         else if (item.Type == JTokenType.Array)
@@ -140,6 +154,7 @@ namespace Jwt_Core1.Models
 
                             doc.Process(infoObject);
                             doc.Process(temp); //table
+                            RemoveTagsWithMissing(doc.Templater); // Remove When Missing
                         }
                     }
                 }
@@ -177,7 +192,8 @@ namespace Jwt_Core1.Models
 
                                         else if (array2p2.Name.StartsWith("image-"))
                                         {
-                                            if (array2p2.Value.ToString() != string.Empty && TryGetFromBase64String(array2p2.Value.ToString()))
+                                            string unescapeString = UnescapeString(array2p2.Value.ToString()); // Unescape String base64
+                                            if (array2p2.Value.ToString() != string.Empty && TryGetFromBase64String(unescapeString))
                                             {
                                                 string valueImage = ProcessImage(array2p2);
                                                 array2p.Add(array2p2.Name, valueImage);
@@ -185,7 +201,7 @@ namespace Jwt_Core1.Models
                                         }
                                         //-> Test Image
 
-                                        else array2p.Add(array2p2.Name, array2p2.Value.ToString());
+                                        else array2p.Add(array2p2.Name, UnescapeString(array2p2.Value.ToString()));
                                     }
                                     lstArr2.Add(array2p);
                                     //array.Path
@@ -200,7 +216,9 @@ namespace Jwt_Core1.Models
 
                                 else if(subItem.Name.StartsWith("image-"))
                                 {
-                                    if (subItem.Value.ToString() != string.Empty && TryGetFromBase64String(subItem.Value.ToString()))
+                                    string unescapeString = UnescapeString(subItem.Value.ToString()); // Unescape String base64
+
+                                    if (subItem.Value.ToString() != string.Empty && TryGetFromBase64String(unescapeString))
                                     {
                                         string valueImage = ProcessImage(subItem);
                                         dicObj.Add(subItem.Name, valueImage); // From base64
@@ -208,7 +226,7 @@ namespace Jwt_Core1.Models
 
                                     //dicObj.Add(subItem.Name, valueImage); // From Url
                                 }
-                                else dicObj.Add(subItem.Name, subItem.Value.ToString());
+                                else dicObj.Add(subItem.Name, UnescapeString(subItem.Value.ToString()));
                             }
                         }
                     }
@@ -220,6 +238,12 @@ namespace Jwt_Core1.Models
             }
 
             return Dictionary_Looping;
+        }
+
+        // Convert json value escape to unescape
+        private string UnescapeString(string text)
+        {
+            return System.Text.RegularExpressions.Regex.Unescape(text);
         }
 
         private Color ProcessColor(JProperty property)
@@ -347,5 +371,25 @@ namespace Jwt_Core1.Models
             return value;
         }
 
+        static void RemoveTagsWithMissing(ITemplater templater)
+        {
+            foreach (var tag in templater.Tags.ToList())
+            {
+                int i = 0;
+                string[] md;
+                //metadata will return null when a tag does not exist at that index
+                while ((md = templater.GetMetadata(tag, i)) != null)
+                {
+                    var missing = md.FirstOrDefault(it => it.StartsWith("missing("));
+                    if (missing != null)
+                    {
+                        var description = missing.Substring(8, missing.Length - 9);
+                        //Replace tag at specific index, not just the first tag
+                        templater.Replace(tag, i, description);
+                    }
+                    else i++;
+                }
+            }
+        }
     }
 }

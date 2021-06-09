@@ -51,25 +51,27 @@ namespace Jwt_Core1.Controllers
                 if (file != null && file.Length > 0)
                 {
                     byte[] data;
+                    
                     using (var br = new BinaryReader(file.OpenReadStream()))
                         data = br.ReadBytes((int)file.OpenReadStream().Length);
 
-                    ByteArrayContent bytes = new ByteArrayContent(data);
                     MultipartFormDataContent multiContent = new MultipartFormDataContent();
-
+                    ByteArrayContent bytes = new ByteArrayContent(data);
+                        
                     multiContent.Add(bytes, "files", file.FileName);
                     multiContent.Add(new StringContent(templatename));
-
+                   
                     var res = new RequestHelper(factory).PostRequest("api/FillDocx/GenerateWithFile", multiContent);
                     if (res.StatusCode == 200)
                         return Download(new FileDownload { filename = res.Content.ToString() });
                 }
-                return BadRequest();
+
+                return BadRequest("Error With File Upload");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-                return NotFound();
+                return NotFound(ex.Message);
             }
         }
 

@@ -60,7 +60,7 @@ namespace Jwt_Core1.Controllers.API
         }
 
         [HttpPost("GenerateWithFile")]
-        public Response GenerateWithFile([FromForm] IFormFile files, [FromForm] string templatename)
+        public async System.Threading.Tasks.Task<Response> GenerateWithFile([FromForm] IFormFile files, [FromForm] string templatename)
         {
             var fileExt = Path.GetExtension(files.FileName).Substring(1);
             if (fileExt != "json")
@@ -73,7 +73,7 @@ namespace Jwt_Core1.Controllers.API
 
             var savePath = Path.Combine(path, info.TimeStamp + ".json");
             var stream = new FileStream(savePath, FileMode.Create);
-            files.CopyToAsync(stream);
+            await files.CopyToAsync(stream);
             stream.Close();
 
             try
